@@ -29,11 +29,12 @@ public class ServiceManager {
     @Value("#{environment['SPOTLIGHT_THRESHOLD']?:${spotlight.threshold}}")
     Double threshold;
 
+    @Value("#{environment['PARALLEL']?:${parallel}}")
+    Integer maxParallel;
+
     LoadingCache<String, LemProService> lemProServices;
 
     LoadingCache<String, DBpediaService> dbpediaServices;
-
-    int maxParallel = 2;
 
     @PostConstruct
     public void setup(){
