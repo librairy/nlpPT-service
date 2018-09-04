@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+docker run -it --rm --name nlp-pt-service -p 7777:7777 -p 65111:65111 librairy/nlp-pt-service:latest

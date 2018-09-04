@@ -1,0 +1,14 @@
+version: '2'
+services:
+  dbpedia-spotlight:
+    image: dbpedia/spotlight-portuguese:latest
+    command: java -Dfile.encoding=UTF-8 -Xmx16G -Dthreads.max=15 -Dthreads.core=15 -jar /opt/spotlight/dbpedia-spotlight-nightly-build.jar /opt/spotlight/pt  http://0.0.0.0:80/rest
+    restart: always
+  nlp-en-service:
+    image: librairy/nlp-pt-service:latest
+    restart: always
+    ports:
+     - "7777:7777"
+     - "65111:65111"
+    environment:
+      - REST_PATH=/pt
