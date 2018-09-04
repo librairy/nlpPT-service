@@ -89,39 +89,46 @@ public class LemProService {
     }
 
     public List<Annotation> annotations(String text, List<PoS> filter)  {
-        String[] sentences = sentenceDetector.annotate(text);
-
-        List<String[]> tokens = Arrays.stream(sentences).map(sentence -> tokenizer.annotate(sentence)).collect(Collectors.toList());
 
         List<Annotation> annotations = new ArrayList<>();
 
-        long offset = 0l;
+        try{
+            String[] sentences = sentenceDetector.annotate(text);
 
-        for (String[] sentenceTokens : tokens){
+            List<String[]> tokens = Arrays.stream(sentences).map(sentence -> tokenizer.annotate(sentence)).collect(Collectors.toList());
 
-            String[] tags = posTagger.annotate(sentenceTokens);
 
-            List<Integer> valids = IntStream.range(0, sentenceTokens.length).filter(i -> !filter.isEmpty() & filter.contains(PoSTranslator.toPoSTag(tags[i]))).boxed().collect(Collectors.toList());
+            long offset = 0l;
 
-            try {
-                String[] lemmas = lemmatizer.lemmatize(sentenceTokens, tags);
+            for (String[] sentenceTokens : tokens){
 
-                for(int i=0;i<sentenceTokens.length;i++){
+                String[] tags = posTagger.annotate(sentenceTokens);
 
-                    Annotation annotation = new Annotation();
-                    annotation.setOffset(offset++);
-                    annotation.setToken(new Token(sentenceTokens[i], lemmas[i], null, PoSTranslator.toPoSTag(tags[i]), null));
+                List<Integer> valids = IntStream.range(0, sentenceTokens.length).filter(i -> !filter.isEmpty() & filter.contains(PoSTranslator.toPoSTag(tags[i]))).boxed().collect(Collectors.toList());
 
-                    if (valids.contains(i)) annotations.add(annotation);
+                try {
+                    String[] lemmas = lemmatizer.lemmatize(sentenceTokens, tags);
 
+                    for(int i=0;i<sentenceTokens.length;i++){
+
+                        Annotation annotation = new Annotation();
+                        annotation.setOffset(offset++);
+                        annotation.setToken(new Token(sentenceTokens[i], lemmas[i], null, PoSTranslator.toPoSTag(tags[i]), null));
+
+                        if (valids.contains(i)) annotations.add(annotation);
+
+                    }
+
+
+                } catch (LemmatizeException e) {
+                    throw new RuntimeException(e);
                 }
 
-
-            } catch (LemmatizeException e) {
-                throw new RuntimeException(e);
             }
-
+        }catch (Exception e){
+            LOG.error("Unexpected error",e);
         }
+
 
         return annotations;
     }
